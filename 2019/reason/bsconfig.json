@@ -4,12 +4,17 @@
   "sources": [
     "1",
     "2",
+    "3",
     {
       "dir": "1/__tests__",
       "type": "dev"
     },
     {
       "dir": "2/__tests__",
+      "type": "dev"
+    },
+    {
+      "dir": "3/__tests__",
       "type": "dev"
     }
   ],
