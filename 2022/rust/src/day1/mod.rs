@@ -22,14 +22,12 @@ fn calories_by_elf() -> Vec<i32> {
     let mut group: Vec<i32> = vec![];
 
     if let Ok(lines) = read_lines("./data/day1_part1.txt") {
-        for line in lines {
-            if let Ok(line_data) = line {
-                if line_data == "" {
-                    parsed_data.push(group);
-                    group = vec![]
-                } else if let Ok(line_value) = line_data.parse::<i32>() {
-                    group.push(line_value);
-                }
+        for line in lines.flatten() {
+            if line.is_empty() {
+                parsed_data.push(group);
+                group = vec![]
+            } else if let Ok(line_value) = line.parse::<i32>() {
+                group.push(line_value);
             }
         }
         if !group.is_empty() {
