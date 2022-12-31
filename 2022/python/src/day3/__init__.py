@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import TypeVar
-
-T = TypeVar('T')
+from utils import chunk_list
 
 @dataclass
 class Rucksack:
@@ -55,8 +53,6 @@ def priority_of_item_type(item_type: str) -> int:
     else:
         raise Exception(f'Invalid item type. Valid item types and prioritys {ITEM_TYPE_PRIORITY}')
 
-def chunk_list(original_list: list[T], chunk_size: int) -> list[list[T]]:
-    return [original_list[i:i + chunk_size] for i in range(0, len(original_list), chunk_size)]
 
 ITEM_TYPE_PRIORITY = {
     'a': 1,
