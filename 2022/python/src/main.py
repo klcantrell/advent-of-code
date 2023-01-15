@@ -3,6 +3,7 @@ import day2
 import day3
 import day4
 import day5
+import day6
 
 def main() -> None:
     day1.part1()
@@ -19,6 +20,9 @@ def main() -> None:
 
     day5.part_1()
     day5.part_2()
+
+    day6.part_1()
+    day6.part_2()
 
 if __name__ == '__main__':
     main()
