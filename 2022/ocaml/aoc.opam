@@ -1,0 +1,31 @@
+opam-version: "2.0"
+synopsis: "A short synopsis"
+description: "A longer description"
+maintainer: ["Maintainer Name"]
+authors: ["Author Name"]
+license: "LICENSE"
+tags: ["topics" "to describe" "your" "project"]
+homepage: "https://github.com/username/reponame"
+doc: "https://url/to/documentation"
+bug-reports: "https://github.com/username/reponame/issues"
+depends: [
+  "ocaml"
+  "dune" {>= "3.9"}
+  "dune-release" {>= "2.0.0"}
+  "odoc" {with-doc}
+
+  # not technically test dependencies
+  # modify when with-dev becomes available (see https://github.com/ocaml/opam/issues/4959)
+  "ocamlformat" {= "0.25.1" & with-test}
+  "merlin" {>= "4.9-500" & with-test}
+  "ocaml-lsp-server" {>= "1.16.2" & with-test}
+  "utop" {>= "2.12.1" & with-test}
+
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+  ["dune" "build" "-p" name "-j" jobs] {with-doc}
+]
+dev-repo: "git+https://github.com/username/reponame.git"

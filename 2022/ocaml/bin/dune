@@ -1,0 +1,11 @@
+(executable
+ (public_name day_1)
+ (name day_1)
+ (modules day_1)
+ (libraries aoc lib))
+
+(executable
+ (public_name day_2)
+ (name day_2)
+ (modules day_2)
+ (libraries aoc lib))
