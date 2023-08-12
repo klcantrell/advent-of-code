@@ -1,16 +1,17 @@
 module Day1Helpers = struct
-  let rec calories_by_elf_aux lines current_group parsed_data =
-    match lines with
-    | [] -> current_group :: parsed_data
-    | line :: rest_lines ->
-        if line = "" then
-          let next_parsed_data = current_group :: parsed_data in
-          calories_by_elf_aux rest_lines [] next_parsed_data
-        else
-          let next_group = int_of_string line :: current_group in
-          calories_by_elf_aux rest_lines next_group parsed_data
-
   let calories_by_elf () =
+    let rec calories_by_elf_aux lines current_group parsed_data =
+      match lines with
+      | [] -> current_group :: parsed_data
+      | line :: rest_lines ->
+          if line = "" then
+            let next_parsed_data = current_group :: parsed_data in
+            calories_by_elf_aux rest_lines [] next_parsed_data
+          else
+            let next_group = int_of_string line :: current_group in
+            calories_by_elf_aux rest_lines next_group parsed_data
+    in
+
     let lines = Lib.read_lines "bin/day_1.txt" in
     calories_by_elf_aux lines [] [] |> List.map Lib.sum
 end
