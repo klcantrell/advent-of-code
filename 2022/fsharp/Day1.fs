@@ -2,8 +2,9 @@ namespace Aoc
 
 open System.IO
 
-module Day1Helpers =
-    let caloriesByElf () =
+[<AbstractClass; Sealed>]
+type Day1Helpers =
+    static member caloriesByElf() =
         let rec caloriesByElfAux lines currentGroup parsedData =
             match lines with
             | [] -> currentGroup :: parsedData
@@ -18,8 +19,9 @@ module Day1Helpers =
         let lines = File.ReadLines "day1.txt" |> List.ofSeq
         caloriesByElfAux lines [] [] |> List.map List.sum
 
+
 module Day1 =
-    open Day1Helpers
+    open type Day1Helpers
 
     let part1 () =
         let max =
