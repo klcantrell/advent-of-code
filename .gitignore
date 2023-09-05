@@ -1,2 +1,8 @@
+# javascript
 node_modules/
+
+# mac
 .DS_STORE
+
+# IDE
+.idea/
