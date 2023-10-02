@@ -31,7 +31,7 @@ pub fn part_2() {
     );
 }
 
-fn lines_to_rucksacks<>() -> Vec<Rucksack> {
+fn lines_to_rucksacks() -> Vec<Rucksack> {
     let mut rucksacks: Vec<Rucksack> = vec![];
 
     if let Ok(lines) = utils::read_lines("./data/day3.txt") {
