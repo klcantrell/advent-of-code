@@ -15,6 +15,21 @@ pub fn part_1() {
     println!("Day 4 Part 1 solution: {}", count);
 }
 
+pub fn part_2() {
+    let mut count = 0;
+
+    for (first, second) in lines_to_assignments().iter() {
+        let first_overlaps_second = first.start <= second.start && first.end >= second.start;
+        let second_overlaps_first = second.start <= first.start && second.end >= first.start;
+
+        if first_overlaps_second || second_overlaps_first {
+            count += 1;
+        }
+    }
+
+    println!("Day 4 Part 2 solution: {}", count);
+}
+
 fn lines_to_assignments() -> Vec<(Assignment, Assignment)> {
     let mut assignments: Vec<(Assignment, Assignment)> = vec![];
 
