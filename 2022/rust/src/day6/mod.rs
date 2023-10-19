@@ -21,7 +21,8 @@ pub fn part_2() {
     let mut window_start = 0;
     let input = get_input();
     let mut current_window = input[window_start..window_start + MESSAGE_LENGTH].to_string();
-    while !is_start_of_message(&current_window) && input.len() >= window_start + MESSAGE_LENGTH + 2 {
+    while !is_start_of_message(&current_window) && input.len() >= window_start + MESSAGE_LENGTH + 2
+    {
         window_start += 1;
         current_window = input[window_start..window_start + MESSAGE_LENGTH].to_string();
     }
