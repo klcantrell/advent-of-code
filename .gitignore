@@ -1,11 +1,5 @@
-# javascript
-node_modules/
-
 # mac
 .DS_STORE
-
-# IDE
-.idea/
 
 # Advent of Code
 puzzle_inputs/
