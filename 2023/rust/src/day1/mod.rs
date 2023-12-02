@@ -13,8 +13,8 @@ pub fn part_1() {
         let result: i32 = lines
             .flatten()
             .map(|line| {
-                let parsed = digits_part_1(line.as_str());
-                extract_digits(parsed)
+                let parsed = parse_digits_part_1(line.as_str());
+                extract_important_digits(parsed)
             })
             .sum();
 
@@ -27,8 +27,8 @@ pub fn part_2() {
         let result: i32 = lines
             .flatten()
             .map(|line| {
-                let parsed = digits_part_2(line.as_str());
-                extract_digits(parsed)
+                let parsed = parse_digits_part_2(line.as_str());
+                extract_important_digits(parsed)
             })
             .sum();
 
@@ -43,7 +43,7 @@ fn is_digit(input: char) -> bool {
     digit1::<&str, nom::error::Error<&str>>(input_encoded).is_ok()
 }
 
-fn digits_part_1(input: &str) -> String {
+fn parse_digits_part_1(input: &str) -> String {
     let mut parsed = String::new();
     let mut remaining = Some(input);
 
@@ -107,7 +107,7 @@ fn word_digit(input: &str) -> IResult<&str, &str> {
     })(input)
 }
 
-fn digits_part_2(input: &str) -> String {
+fn parse_digits_part_2(input: &str) -> String {
     let mut parsed = String::new();
     let mut remaining = Some(input);
 
@@ -130,7 +130,7 @@ fn digits_part_2(input: &str) -> String {
     parsed
 }
 
-fn extract_digits(parsed: String) -> i32 {
+fn extract_important_digits(parsed: String) -> i32 {
     let mut parsed_characters = parsed.chars();
     let first = parsed_characters.next();
     if let (Some(first), Some(last)) = (first, parsed_characters.next_back().or(first)) {
