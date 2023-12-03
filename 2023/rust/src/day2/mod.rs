@@ -36,6 +36,43 @@ pub fn part_1() {
     }
 }
 
+pub fn part_2() {
+    if let Ok(lines) = utils::read_lines("./puzzle_inputs/day2.txt") {
+        let games: Vec<Game> = lines
+            .flatten()
+            .filter_map(|mut line| {
+                line.retain(|c| !c.is_whitespace());
+
+                parse_game(line)
+            })
+            .collect();
+
+        let minimums = games.iter().map(|game| {
+            game.rounds.iter().fold(
+                (0, 0, 0),
+                |(minimum_red, minimum_green, minimum_blue), round| {
+                    let next_minimum_red = i32::max(minimum_red, round.red);
+                    let next_minimum_green = i32::max(minimum_green, round.green);
+                    let next_minimum_blue = i32::max(minimum_blue, round.blue);
+
+                    (next_minimum_red, next_minimum_green, next_minimum_blue)
+                },
+            )
+        });
+
+        println!(
+            "Day 2 Part 1 solution: {}",
+            minimums.fold(
+                0,
+                |sum_of_powers, (minimum_red, minimum_green, minimum_blue)| minimum_red
+                    * minimum_green
+                    * minimum_blue
+                    + sum_of_powers
+            )
+        );
+    }
+}
+
 fn parse_game(line: String) -> Option<Game> {
     if let Ok((rounds_input, game_name)) = delimited(
         tag::<&str, &str, nom::error::Error<_>>("Game"),
