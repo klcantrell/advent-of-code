@@ -144,6 +144,6 @@ impl Game {
 #[derive(Debug)]
 struct Round {
     red: i32,
-    blue: i32,
     green: i32,
+    blue: i32,
 }
