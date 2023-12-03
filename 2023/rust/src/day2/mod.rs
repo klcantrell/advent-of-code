@@ -113,28 +113,23 @@ impl Game {
             id: name.parse::<i32>().unwrap_or(0),
             rounds: parsed_rounds
                 .iter()
-                .map(|round| {
-                    round.iter().fold(
-                        Round {
-                            red: 0,
-                            green: 0,
-                            blue: 0,
-                        },
-                        |mut round_result, (color_value, color_name)| {
-                            match *color_name {
-                                "red" => round_result.red = color_value.parse::<i32>().unwrap_or(0),
-                                "green" => {
-                                    round_result.green = color_value.parse::<i32>().unwrap_or(0)
-                                }
-                                "blue" => {
-                                    round_result.blue = color_value.parse::<i32>().unwrap_or(0)
-                                }
-                                _ => (),
-                            };
+                .map(|parsed_round| {
+                    let mut round = Round {
+                        red: 0,
+                        green: 0,
+                        blue: 0,
+                    };
 
-                            round_result
-                        },
-                    )
+                    for (color_value, color_name) in parsed_round {
+                        match *color_name {
+                            "red" => round.red = color_value.parse::<i32>().unwrap_or(0),
+                            "green" => round.green = color_value.parse::<i32>().unwrap_or(0),
+                            "blue" => round.blue = color_value.parse::<i32>().unwrap_or(0),
+                            _ => (),
+                        };
+                    }
+
+                    round
                 })
                 .collect(),
         }
