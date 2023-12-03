@@ -61,7 +61,7 @@ pub fn part_2() {
         });
 
         println!(
-            "Day 2 Part 1 solution: {}",
+            "Day 2 Part 2 solution: {}",
             minimums.fold(
                 0,
                 |sum_of_powers, (minimum_red, minimum_green, minimum_blue)| minimum_red
