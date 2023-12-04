@@ -80,6 +80,89 @@ pub fn part_1() {
     }
 }
 
+pub fn part_2() {
+    if let Ok(lines) = utils::read_lines("./puzzle_inputs/day3.txt") {
+        let mut gear_ratios: Vec<i32> = vec![];
+
+        let schematic = Rc::new(parse_schematic(lines));
+
+        for (row_index, row) in schematic.clone().iter().enumerate() {
+            for element in row {
+                if let ElementKind::Symbol('*') = element.kind {
+                    let mut adjacent_part_numbers: Vec<i32> = vec![];
+
+                    row.iter()
+                        .filter(|other| is_adjacent_symbol_horizontal(other, element))
+                        .for_each(|other| {
+                            if let ElementKind::Number(value) = &other.kind {
+                                if let Ok(part_number) =
+                                    value.iter().collect::<String>().parse::<i32>()
+                                {
+                                    adjacent_part_numbers.push(part_number);
+                                }
+                            }
+                        });
+
+                    if row_index == 0 {
+                        if let Some(next_row) = schematic.clone().iter().nth(row_index + 1) {
+                            next_row
+                                .iter()
+                                .filter(|other| is_adjacent_symbol_vertical(other, element))
+                                .for_each(|other| {
+                                    if let ElementKind::Number(value) = &other.kind {
+                                        if let Ok(part_number) =
+                                            value.iter().collect::<String>().parse::<i32>()
+                                        {
+                                            adjacent_part_numbers.push(part_number);
+                                        }
+                                    }
+                                });
+                        }
+                    } else {
+                        if let Some(previous_row) = schematic.clone().iter().nth(row_index - 1) {
+                            previous_row
+                                .iter()
+                                .filter(|other| is_adjacent_symbol_vertical(other, element))
+                                .for_each(|other| {
+                                    if let ElementKind::Number(value) = &other.kind {
+                                        if let Ok(part_number) =
+                                            value.iter().collect::<String>().parse::<i32>()
+                                        {
+                                            adjacent_part_numbers.push(part_number);
+                                        }
+                                    }
+                                });
+                        }
+
+                        if let Some(next_row) = schematic.clone().iter().nth(row_index + 1) {
+                            next_row
+                                .iter()
+                                .filter(|other| is_adjacent_symbol_vertical(other, element))
+                                .for_each(|other| {
+                                    if let ElementKind::Number(value) = &other.kind {
+                                        if let Ok(part_number) =
+                                            value.iter().collect::<String>().parse::<i32>()
+                                        {
+                                            adjacent_part_numbers.push(part_number);
+                                        }
+                                    }
+                                });
+                        }
+                    }
+
+                    if adjacent_part_numbers.len() != 2 {
+                        continue;
+                    } else {
+                        gear_ratios.push(adjacent_part_numbers[0] * adjacent_part_numbers[1]);
+                    }
+                }
+            }
+        }
+
+        println!("Day 3 Part 2 solution: {}", gear_ratios.iter().sum::<i32>());
+    }
+}
+
 fn is_adjacent_symbol_horizontal(element: &Element, other_element: &Element) -> bool {
     if element.position == other_element.position {
         return false;
