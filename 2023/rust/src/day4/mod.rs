@@ -29,7 +29,7 @@ pub fn part_1() {
             points
         });
 
-        println!("Day 4 Part 1 solution: {:?}", points.sum::<i32>());
+        println!("Day 4 Part 1 solution: {}", points.sum::<i32>());
     }
 }
 
@@ -70,7 +70,7 @@ pub fn part_2() {
         }
 
         println!(
-            "Day 4 Part 2 solution: {:?}",
+            "Day 4 Part 2 solution: {}",
             cards_length + copies.borrow().clone().into_values().sum::<i32>()
         );
     }
