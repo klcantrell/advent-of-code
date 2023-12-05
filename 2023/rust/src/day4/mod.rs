@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, time::SystemTime};
 
 use nom::{
     bytes::complete::tag,
@@ -10,6 +10,8 @@ use nom::{
 use crate::utils;
 
 pub fn part_1() {
+    let now = SystemTime::now();
+
     if let Ok(lines) = utils::read_lines("./puzzle_inputs/day4.txt") {
         let cards: Vec<Card> = lines.flatten().filter_map(parse_card).collect();
 
@@ -31,9 +33,15 @@ pub fn part_1() {
 
         println!("Day 4 Part 1 solution: {}", points.sum::<i32>());
     }
+
+    if let Ok(elapsed) = now.elapsed() {
+        println!("👆 finished in {} seconds", elapsed.as_secs_f32())
+    }
 }
 
 pub fn part_2() {
+    let now = SystemTime::now();
+
     if let Ok(lines) = utils::read_lines("./puzzle_inputs/day4.txt") {
         let cards: Vec<Card> = lines.flatten().filter_map(parse_card).collect();
         let cards_length = cards.len() as i32;
@@ -73,6 +81,10 @@ pub fn part_2() {
             "Day 4 Part 2 solution: {}",
             cards_length + copies.borrow().clone().into_values().sum::<i32>()
         );
+    }
+
+    if let Ok(elapsed) = now.elapsed() {
+        println!("👆 finished in {} seconds", elapsed.as_secs_f32())
     }
 }
 
