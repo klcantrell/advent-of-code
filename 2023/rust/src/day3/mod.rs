@@ -5,7 +5,17 @@ use std::{
     vec,
 };
 
+use nom::{
+    branch::alt,
+    bytes::complete::is_not,
+    character::complete::digit1,
+    combinator::{iterator, map},
+};
+use nom_locate::LocatedSpan;
+
 use crate::utils;
+
+type Span<'a> = LocatedSpan<&'a str>;
 
 pub fn part_1() {
     if let Ok(lines) = utils::read_lines("./puzzle_inputs/day3.txt") {
@@ -197,43 +207,22 @@ fn parse_schematic(lines: io::Lines<BufReader<File>>) -> Vec<Vec<Element>> {
     let mut elements: Vec<Vec<Element>> = vec![];
 
     for line in lines.flatten() {
-        let mut current_row: Vec<Element> = vec![];
-        let mut digits: Vec<char> = vec![];
+        let parsed: Vec<Element> = iterator(
+            Span::new(&line),
+            alt((
+                map(digit1::<Span, nom::error::Error<Span>>, |span| Element {
+                    kind: ElementKind::Number(span.chars().collect()),
+                    position: span.get_column() as i32,
+                }),
+                map(is_not(".0123456789"), |span: Span| Element {
+                    kind: ElementKind::Symbol(span.chars().next().unwrap()),
+                    position: span.get_column() as i32,
+                }),
+            )),
+        )
+        .collect();
 
-        for (column_index, character) in line.chars().enumerate() {
-            if character.is_ascii_digit() {
-                digits.push(character);
-
-                if column_index == line.len() - 1 {
-                    let position = column_index - digits.len() + 1;
-                    current_row.push(Element {
-                        kind: ElementKind::Number(digits),
-                        position: position as i32,
-                    });
-                    digits = vec![];
-                }
-            } else {
-                if !digits.is_empty() {
-                    let position = column_index - digits.len();
-                    current_row.push(Element {
-                        kind: ElementKind::Number(digits),
-                        position: position as i32,
-                    });
-                    digits = vec![];
-                }
-
-                if character == '.' {
-                    continue;
-                } else {
-                    current_row.push(Element {
-                        kind: ElementKind::Symbol(character),
-                        position: column_index as i32,
-                    });
-                }
-            }
-        }
-
-        elements.push(current_row);
+        elements.push(parsed);
     }
 
     elements
