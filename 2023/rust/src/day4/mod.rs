@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc, time::SystemTime};
+use std::{collections::HashMap, time::SystemTime};
 
 use nom::{
     bytes::complete::tag,
@@ -46,17 +46,14 @@ pub fn part_2() {
         let cards: Vec<Card> = lines.flatten().filter_map(parse_card).collect();
         let cards_length = cards.len() as i32;
 
-        let copies: Rc<RefCell<HashMap<String, i32>>> = Rc::new(RefCell::new(HashMap::new()));
+        let mut copies: HashMap<String, i32> = HashMap::new();
 
         for card in cards {
             let card_name_value = card
                 .name
                 .parse::<i32>()
                 .expect("Card name should be numerical");
-            let mut copies_instance = copies.borrow_mut();
-            let copies_of_this_card = *copies_instance
-                .get(&card_name_value.to_string())
-                .unwrap_or(&0);
+            let copies_of_this_card = *copies.get(&card_name_value.to_string()).unwrap_or(&0);
 
             let mut number_of_matches: i32 = 0;
             for player_value in &card.player_values {
@@ -69,17 +66,17 @@ pub fn part_2() {
                 let key = i.to_string();
                 let mut previous_number_of_copies: i32 = 0;
 
-                if let Some(previous_value) = copies_instance.get(&key) {
+                if let Some(previous_value) = copies.get(&key) {
                     previous_number_of_copies = *previous_value;
                 }
 
-                copies_instance.insert(key, previous_number_of_copies + copies_of_this_card + 1);
+                copies.insert(key, previous_number_of_copies + copies_of_this_card + 1);
             }
         }
 
         println!(
             "Day 4 Part 2 solution: {}",
-            cards_length + copies.borrow().clone().into_values().sum::<i32>()
+            cards_length + copies.into_values().sum::<i32>()
         );
     }
 
