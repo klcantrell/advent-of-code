@@ -25,152 +25,7 @@ pub fn part_1() {
 
     let (seeds, maps) = parse_almanac(input);
 
-    let mut locations: Vec<i64> = seeds
-        .iter()
-        .map(|seed| {
-            let soil = maps
-                .get(SEED_TO_SOIL_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(seed) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = seed - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(*seed);
-
-            let fertilizer = maps
-                .get(SOIL_TO_FERTILIZER_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(&soil) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = soil - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(soil);
-
-            let water = maps
-                .get(FERTILIZER_TO_WATER_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(&fertilizer) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = fertilizer - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(fertilizer);
-
-            let light = maps
-                .get(WATER_TO_LIGHT_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(&water) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = water - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(water);
-
-            let temperature = maps
-                .get(LIGHT_TO_TEMPERATURE_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(&light) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = light - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(light);
-
-            let humidity = maps
-                .get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(&temperature) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = temperature - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(temperature);
-
-            let location = maps
-                .get(HUMIDITY_TO_LOCATION_CATEGORY)
-                .unwrap_or(&vec![])
-                .iter()
-                .find_map(|mapping| {
-                    let source_upper_bound = mapping.source_range_start + mapping.range_length;
-                    if (mapping.source_range_start..source_upper_bound).contains(&humidity) {
-                        let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                        let potential_destination = humidity - mapping.source_range_start + mapping.destination_range_start;
-                        if (mapping.destination_range_start..desination_upper_bound).contains(&potential_destination) {
-                            Some(potential_destination)
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or(humidity);
-
-            location
-        })
-        .collect();
+    let mut locations: Vec<i64> = seeds.iter().map(move |seed| get_location(*seed, &maps)).collect();
 
     locations.sort();
 
@@ -285,6 +140,171 @@ fn parse_almanac(input: &str) -> (Vec<i64>, HashMap<String, Vec<AlmanacMap>>) {
     }
 
     (seeds, maps)
+}
+
+fn get_location(seed_value: i64, maps: &HashMap<String, Vec<AlmanacMap>>) -> i64 {
+    let soil = maps
+        .get(SEED_TO_SOIL_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&seed_value) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    seed_value - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(seed_value);
+
+    let fertilizer = maps
+        .get(SOIL_TO_FERTILIZER_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&soil) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    soil - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(soil);
+
+    let water = maps
+        .get(FERTILIZER_TO_WATER_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&fertilizer) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    fertilizer - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(fertilizer);
+
+    let light = maps
+        .get(WATER_TO_LIGHT_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&water) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    water - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(water);
+
+    let temperature = maps
+        .get(LIGHT_TO_TEMPERATURE_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&light) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    light - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(light);
+
+    let humidity = maps
+        .get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&temperature) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    temperature - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(temperature);
+
+    let location = maps
+        .get(HUMIDITY_TO_LOCATION_CATEGORY)
+        .unwrap_or(&vec![])
+        .iter()
+        .find_map(|mapping| {
+            let source_upper_bound = mapping.source_range_start + mapping.range_length;
+            if (mapping.source_range_start..source_upper_bound).contains(&humidity) {
+                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
+                let potential_destination =
+                    humidity - mapping.source_range_start + mapping.destination_range_start;
+                if (mapping.destination_range_start..desination_upper_bound)
+                    .contains(&potential_destination)
+                {
+                    Some(potential_destination)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .unwrap_or(humidity);
+
+    location
 }
 
 #[derive(Debug)]
