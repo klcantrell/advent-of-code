@@ -1,4 +1,7 @@
-use std::{collections::HashMap, time::SystemTime};
+use std::{
+    collections::{HashMap, HashSet},
+    time::SystemTime,
+};
 
 use nom::{
     branch::alt,
@@ -23,13 +26,55 @@ pub fn part_1() {
 
     let input = include_str!("../../puzzle_inputs/day5.txt");
 
+    let mut min_location: i64 = i64::MAX;
+
     let (seeds, maps) = parse_almanac(input);
 
-    let mut locations: Vec<i64> = seeds.iter().map(move |seed| get_location(*seed, &maps)).collect();
+    for seed in seeds {
+        min_location = i64::min(min_location, get_location(seed, &maps));
+    }
 
-    locations.sort();
+    println!("Day 5 Part 1 solution: {}", min_location);
 
-    println!("Day 5 Part 1 solution: {}", locations.first().unwrap_or(&0));
+    if let Ok(elapsed) = now.elapsed() {
+        println!("👆 finished in {} seconds", elapsed.as_secs_f32())
+    }
+}
+
+pub fn part_2() {
+    let now = SystemTime::now();
+
+    let input = include_str!("../../puzzle_inputs/day5.txt");
+
+    let mut min_location: i64 = i64::MAX;
+
+    let (seed_ranges, maps) = parse_almanac(input);
+    let seed_ranges = seed_ranges.chunks(2);
+    let seed_ranges_length = seed_ranges.len();
+
+    for (seed_range_index, data) in seed_ranges.enumerate() {
+        if data.first().is_none() || data.get(1).is_none() {
+            panic!("Each seed range should have a start value and a range length value");
+        }
+        let seed_range_start = data[0];
+        let seed_range_length = data[1];
+        let upper_bound = seed_range_start + seed_range_length;
+        let seed_range = seed_range_start..upper_bound;
+
+        println!(
+            "Processing seed range {}-{} - on step {} / {}",
+            seed_range_start,
+            upper_bound,
+            seed_range_index + 1,
+            seed_ranges_length,
+        );
+
+        for seed_value in seed_range {
+            min_location = i64::min(min_location, get_location(seed_value, &maps));
+        }
+    }
+
+    println!("Day 5 Part 2 solution: {}", min_location);
 
     if let Ok(elapsed) = now.elapsed() {
         println!("👆 finished in {} seconds", elapsed.as_secs_f32())
