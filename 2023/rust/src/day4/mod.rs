@@ -46,7 +46,7 @@ pub fn part_2() {
         let cards: Vec<Card> = lines.flatten().filter_map(parse_card).collect();
         let cards_length = cards.len() as i32;
 
-        let mut copies: HashMap<String, i32> = HashMap::new();
+        let mut copies = HashMap::<String, i32>::new();
 
         for card in cards {
             let card_name_value = card
