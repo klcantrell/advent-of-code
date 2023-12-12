@@ -28,8 +28,25 @@ pub fn part_1() {
 
     let (seeds, maps) = parse_almanac(input);
 
+    let maps: [&Vec<AlmanacMap>; 7] = [
+        maps.get(SEED_TO_SOIL_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(SOIL_TO_FERTILIZER_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(FERTILIZER_TO_WATER_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(WATER_TO_LIGHT_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(LIGHT_TO_TEMPERATURE_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(HUMIDITY_TO_LOCATION_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+    ];
+
     for seed in seeds {
-        min_location = i64::min(min_location, get_location(seed, &maps));
+        min_location = i64::min(min_location, get_location(seed, maps));
     }
 
     println!("Day 5 Part 1 solution: {}", min_location);
@@ -45,6 +62,24 @@ pub fn part_2() {
     let input = include_str!("../../puzzle_inputs/day5.txt");
 
     let (seed_ranges, maps) = parse_almanac(input);
+
+    let maps: [&Vec<AlmanacMap>; 7] = [
+        maps.get(SEED_TO_SOIL_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(SOIL_TO_FERTILIZER_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(FERTILIZER_TO_WATER_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(WATER_TO_LIGHT_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(LIGHT_TO_TEMPERATURE_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+        maps.get(HUMIDITY_TO_LOCATION_CATEGORY)
+            .expect("seed-to-soil map incorrectly parsed"),
+    ];
+
     let seed_ranges = seed_ranges.par_chunks(2);
     let seed_ranges_length = seed_ranges.len();
 
@@ -70,7 +105,7 @@ pub fn part_2() {
             );
 
             for seed_value in seed_range {
-                min_location = i64::min(min_location, get_location(seed_value, &maps));
+                min_location = i64::min(min_location, get_location(seed_value, maps));
             }
 
             min_location
@@ -179,7 +214,7 @@ fn parse_almanac(input: &str) -> (Vec<i64>, HashMap<String, Vec<AlmanacMap>>) {
                             AlmanacMap {
                                 destination_range_start: parsed[0],
                                 source_range_start: parsed[1],
-                                range_length: parsed[2],
+                                source_range_end: parsed[1] + parsed[2],
                             }
                         }),
                     )
@@ -195,174 +230,29 @@ fn parse_almanac(input: &str) -> (Vec<i64>, HashMap<String, Vec<AlmanacMap>>) {
     (seeds, maps)
 }
 
-fn get_location(seed_value: i64, maps: &HashMap<String, Vec<AlmanacMap>>) -> i64 {
-    let soil = maps
-        .get(SEED_TO_SOIL_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&seed_value) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    seed_value - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
+fn get_location(seed_value: i64, maps: [&Vec<AlmanacMap>; 7]) -> i64 {
+    maps.iter()
+        .fold(seed_value, |previous_mapped_value, mappings| {
+            mappings
+                .iter()
+                .find_map(|mapping| {
+                    if (mapping.source_range_start..mapping.source_range_end)
+                        .contains(&previous_mapped_value)
+                    {
+                        let next_mapped_value = previous_mapped_value - mapping.source_range_start
+                            + mapping.destination_range_start;
+                        Some(next_mapped_value)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or(previous_mapped_value)
         })
-        .unwrap_or(seed_value);
-
-    let fertilizer = maps
-        .get(SOIL_TO_FERTILIZER_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&soil) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    soil - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .unwrap_or(soil);
-
-    let water = maps
-        .get(FERTILIZER_TO_WATER_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&fertilizer) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    fertilizer - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .unwrap_or(fertilizer);
-
-    let light = maps
-        .get(WATER_TO_LIGHT_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&water) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    water - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .unwrap_or(water);
-
-    let temperature = maps
-        .get(LIGHT_TO_TEMPERATURE_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&light) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    light - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .unwrap_or(light);
-
-    let humidity = maps
-        .get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&temperature) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    temperature - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .unwrap_or(temperature);
-
-    let location = maps
-        .get(HUMIDITY_TO_LOCATION_CATEGORY)
-        .unwrap_or(&vec![])
-        .iter()
-        .find_map(|mapping| {
-            let source_upper_bound = mapping.source_range_start + mapping.range_length;
-            if (mapping.source_range_start..source_upper_bound).contains(&humidity) {
-                let desination_upper_bound = mapping.destination_range_start + mapping.range_length;
-                let potential_destination =
-                    humidity - mapping.source_range_start + mapping.destination_range_start;
-                if (mapping.destination_range_start..desination_upper_bound)
-                    .contains(&potential_destination)
-                {
-                    Some(potential_destination)
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
-        .unwrap_or(humidity);
-
-    location
 }
 
 #[derive(Debug)]
 struct AlmanacMap {
     destination_range_start: i64,
     source_range_start: i64,
-    range_length: i64,
+    source_range_end: i64,
 }
