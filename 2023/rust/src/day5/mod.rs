@@ -32,17 +32,17 @@ pub fn part_1() {
         maps.get(SEED_TO_SOIL_CATEGORY)
             .expect("seed-to-soil map incorrectly parsed"),
         maps.get(SOIL_TO_FERTILIZER_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("soil-to-fertilizer map incorrectly parsed"),
         maps.get(FERTILIZER_TO_WATER_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("fertilizer-to-water map incorrectly parsed"),
         maps.get(WATER_TO_LIGHT_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("water-to-light map incorrectly parsed"),
         maps.get(LIGHT_TO_TEMPERATURE_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("light-to-temperature map incorrectly parsed"),
         maps.get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("temperature-to-humidity map incorrectly parsed"),
         maps.get(HUMIDITY_TO_LOCATION_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("humidity-to-location map incorrectly parsed"),
     ];
 
     for seed in seeds {
@@ -67,17 +67,17 @@ pub fn part_2() {
         maps.get(SEED_TO_SOIL_CATEGORY)
             .expect("seed-to-soil map incorrectly parsed"),
         maps.get(SOIL_TO_FERTILIZER_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("soil-to-fertilizer map incorrectly parsed"),
         maps.get(FERTILIZER_TO_WATER_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("fertilizer-to-water map incorrectly parsed"),
         maps.get(WATER_TO_LIGHT_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("water-to-light map incorrectly parsed"),
         maps.get(LIGHT_TO_TEMPERATURE_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("light-to-temperature map incorrectly parsed"),
         maps.get(TEMPERATURE_TO_HUMIDITY_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("temperature-to-humidity map incorrectly parsed"),
         maps.get(HUMIDITY_TO_LOCATION_CATEGORY)
-            .expect("seed-to-soil map incorrectly parsed"),
+            .expect("humidity-to-location map incorrectly parsed"),
     ];
 
     let seed_ranges = seed_ranges.par_chunks(2);
