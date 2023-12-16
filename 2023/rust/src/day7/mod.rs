@@ -13,7 +13,7 @@ use nom::{
 pub fn part_1() {
     let input = include_str!("../../puzzle_inputs/day7.txt");
 
-    if let Some(mut hands) = parse_hands(input) {
+    if let Some(mut hands) = parse_hands_part_1(input) {
         hands.sort_by(|a, b| a.0.cmp(&b.0));
 
         let total_winnings: i32 =
@@ -27,7 +27,24 @@ pub fn part_1() {
     }
 }
 
-fn parse_hands(input: &str) -> Option<Vec<(HandType, i32)>> {
+pub fn part_2() {
+    let input = include_str!("../../puzzle_inputs/day7.txt");
+
+    if let Some(mut hands) = parse_hands_part_2(input) {
+        hands.sort_by(|a, b| a.0.cmp(&b.0));
+
+        let total_winnings: i32 =
+            hands
+                .iter()
+                .enumerate()
+                .fold(0, |total_winnings_so_far, (rank, (_, bid))| {
+                    total_winnings_so_far + ((rank as i32 + 1) * bid)
+                });
+        println!("Day 7 Part 2 solution: {}", total_winnings);
+    }
+}
+
+fn parse_hands_part_1(input: &str) -> Option<Vec<(HandType, i32)>> {
     separated_list1(
         line_ending,
         separated_pair(
@@ -79,6 +96,87 @@ fn parse_hands(input: &str) -> Option<Vec<(HandType, i32)>> {
     .ok()
 }
 
+fn parse_hands_part_2(input: &str) -> Option<Vec<(HandType, i32)>> {
+    separated_list1(
+        line_ending,
+        separated_pair(
+            map_res(alphanumeric1::<&str, nom::error::Error<&str>>, |raw_hand| {
+                let mut char_map = HashMap::<char, i32>::new();
+                raw_hand.chars().for_each(|c| {
+                    if let Some(existing_char_count) = char_map.get(&c) {
+                        char_map.insert(c, existing_char_count + 1);
+                    } else {
+                        char_map.insert(c, 1);
+                    }
+                });
+
+                let jokers_count = *char_map.get(&'J').unwrap_or(&0);
+                let mut char_map_values_without_jokers: Vec<i32> = char_map
+                    .iter()
+                    .filter(|(k, _v)| **k != 'J')
+                    .map(|(_k, v)| *v)
+                    .collect();
+                char_map_values_without_jokers.sort_by(|a, b| b.cmp(a));
+
+                if jokers_count >= 4
+                    || (jokers_count == 3 && char_map_values_without_jokers.contains(&2))
+                    || (jokers_count == 2 && char_map_values_without_jokers.contains(&3))
+                    || (jokers_count == 1 && char_map_values_without_jokers.contains(&4))
+                    || char_map_values_without_jokers.contains(&5)
+                {
+                    Ok::<HandType, nom::error::Error<&str>>(HandType::FiveOfAKind(
+                        raw_hand.to_string(),
+                    ))
+                } else if jokers_count == 3
+                    || (jokers_count == 2 && char_map_values_without_jokers.contains(&2))
+                    || (jokers_count == 1 && char_map_values_without_jokers.contains(&3))
+                    || char_map_values_without_jokers.contains(&4)
+                {
+                    Ok(HandType::FourOfAKind(raw_hand.to_string()))
+                } else if (jokers_count == 2
+                    && char_map_values_without_jokers.contains(&2)
+                    && char_map_values_without_jokers.contains(&1))
+                    || (jokers_count == 1
+                        && char_map_values_without_jokers.len() == 2
+                        && char_map_values_without_jokers[0] == 2
+                        && char_map_values_without_jokers[1] == 2)
+                    || (char_map_values_without_jokers.contains(&3)
+                        && char_map_values_without_jokers.contains(&2))
+                {
+                    Ok(HandType::FullHouse(raw_hand.to_string()))
+                } else if jokers_count == 2
+                    || (jokers_count == 1 && char_map_values_without_jokers.contains(&2))
+                    || char_map_values_without_jokers.contains(&3)
+                {
+                    Ok(HandType::ThreeOfAKind(raw_hand.to_string()))
+                } else if (jokers_count == 1
+                    && char_map_values_without_jokers.contains(&2)
+                    && char_map_values_without_jokers.contains(&1))
+                    || (char_map_values_without_jokers.len() == 3
+                        && char_map_values_without_jokers[0] == 2
+                        && char_map_values_without_jokers[1] == 2)
+                {
+                    Ok(HandType::TwoPair(raw_hand.to_string()))
+                } else if jokers_count == 1 || char_map_values_without_jokers.contains(&2) {
+                    Ok(HandType::OnePair(raw_hand.to_string()))
+                } else {
+                    Ok(HandType::HighCard(raw_hand.to_string()))
+                }
+            }),
+            space1,
+            map_res(digit1, |raw_bid_value: &str| {
+                Ok::<i32, nom::error::Error<&str>>(
+                    raw_bid_value
+                        .parse::<i32>()
+                        .expect("Each hand's bid should be a number"),
+                )
+            }),
+        ),
+    )(input)
+    .map(|(_, parsed)| parsed)
+    .ok()
+}
+
 #[derive(Debug, Eq)]
 enum HandType {
     FiveOfAKind(String),
@@ -94,25 +192,25 @@ impl Ord for HandType {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (HandType::FiveOfAKind(left), HandType::FiveOfAKind(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::FiveOfAKind(_), _) => Ordering::Greater,
             (HandType::FourOfAKind(_), HandType::FiveOfAKind(_)) => Ordering::Less,
             (HandType::FourOfAKind(left), HandType::FourOfAKind(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::FourOfAKind(_), _) => Ordering::Greater,
             (HandType::FullHouse(_), HandType::FiveOfAKind(_)) => Ordering::Less,
             (HandType::FullHouse(_), HandType::FourOfAKind(_)) => Ordering::Less,
             (HandType::FullHouse(left), HandType::FullHouse(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::FullHouse(_), _) => Ordering::Greater,
             (HandType::ThreeOfAKind(_), HandType::FiveOfAKind(_)) => Ordering::Less,
             (HandType::ThreeOfAKind(_), HandType::FourOfAKind(_)) => Ordering::Less,
             (HandType::ThreeOfAKind(_), HandType::FullHouse(_)) => Ordering::Less,
             (HandType::ThreeOfAKind(left), HandType::ThreeOfAKind(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::ThreeOfAKind(_), _) => Ordering::Greater,
             (HandType::TwoPair(_), HandType::FiveOfAKind(_)) => Ordering::Less,
@@ -120,7 +218,7 @@ impl Ord for HandType {
             (HandType::TwoPair(_), HandType::FullHouse(_)) => Ordering::Less,
             (HandType::TwoPair(_), HandType::ThreeOfAKind(_)) => Ordering::Less,
             (HandType::TwoPair(left), HandType::TwoPair(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::TwoPair(_), _) => Ordering::Greater,
             (HandType::OnePair(_), HandType::FiveOfAKind(_)) => Ordering::Less,
@@ -129,11 +227,11 @@ impl Ord for HandType {
             (HandType::OnePair(_), HandType::ThreeOfAKind(_)) => Ordering::Less,
             (HandType::OnePair(_), HandType::TwoPair(_)) => Ordering::Less,
             (HandType::OnePair(left), HandType::OnePair(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::OnePair(_), HandType::HighCard(_)) => Ordering::Greater,
             (HandType::HighCard(left), HandType::HighCard(right)) => {
-                compare_hands_card_by_card(left, right)
+                compare_hands_card_by_card_part_2(left, right)
             }
             (HandType::HighCard(_), _) => Ordering::Less,
         }
@@ -161,7 +259,8 @@ impl PartialEq for HandType {
     }
 }
 
-fn compare_hands_card_by_card(left: &str, right: &str) -> Ordering {
+#[allow(dead_code)]
+fn compare_hands_card_by_card_part_1(left: &str, right: &str) -> Ordering {
     left.chars()
         .zip(right.chars())
         .fold(Ordering::Equal, |ordering, (left_char, right_char)| {
@@ -192,7 +291,55 @@ fn compare_hands_card_by_card(left: &str, right: &str) -> Ordering {
                         ('J', _) => Ordering::Greater,
                         ('T', 'T') => Ordering::Equal,
                         ('T', _) => Ordering::Less,
-                        _ => panic!("Invalid card. Lettered cards should be A, J, Q, J or T"),
+                        _ => panic!("Invalid card. Lettered cards should be A, K, Q, J or T"),
+                    }
+                }
+            } else {
+                ordering
+            }
+        })
+}
+
+fn compare_hands_card_by_card_part_2(left: &str, right: &str) -> Ordering {
+    left.chars()
+        .zip(right.chars())
+        .fold(Ordering::Equal, |ordering, (left_char, right_char)| {
+            if let Ordering::Equal = ordering {
+                if let (Some(left_num), Some(right_num)) =
+                    (left_char.to_digit(10), right_char.to_digit(10))
+                {
+                    left_num.cmp(&right_num)
+                } else if left_char.is_numeric() {
+                    if right_char == 'J' {
+                        Ordering::Greater
+                    } else {
+                        Ordering::Less
+                    }
+                } else if right_char.is_numeric() {
+                    if left_char == 'J' {
+                        Ordering::Less
+                    } else {
+                        Ordering::Greater
+                    }
+                } else {
+                    match (left_char, right_char) {
+                        ('A', 'A') => Ordering::Equal,
+                        ('A', _) => Ordering::Greater,
+                        ('K', 'A') => Ordering::Less,
+                        ('K', 'K') => Ordering::Equal,
+                        ('K', _) => Ordering::Greater,
+                        ('Q', 'A') => Ordering::Less,
+                        ('Q', 'K') => Ordering::Less,
+                        ('Q', 'Q') => Ordering::Equal,
+                        ('Q', _) => Ordering::Greater,
+                        ('T', 'A') => Ordering::Less,
+                        ('T', 'K') => Ordering::Less,
+                        ('T', 'Q') => Ordering::Less,
+                        ('T', 'T') => Ordering::Equal,
+                        ('T', _) => Ordering::Greater,
+                        ('J', 'J') => Ordering::Equal,
+                        ('J', _) => Ordering::Less,
+                        _ => panic!("Invalid card. Lettered cards should be A, K, Q, J or T"),
                     }
                 }
             } else {
