@@ -207,20 +207,33 @@ fn parse_schematic(lines: io::Lines<BufReader<File>>) -> Vec<Vec<Element>> {
     let mut elements: Vec<Vec<Element>> = vec![];
 
     for line in lines.flatten() {
-        let parsed: Vec<Element> = iterator(
+        let parsed: Vec<Option<Element>> = iterator(
             Span::new(&line),
             alt((
-                map(digit1::<Span, nom::error::Error<Span>>, |span| Element {
-                    kind: ElementKind::Number(span.chars().collect()),
-                    position: span.get_column() as i32,
+                map(
+                    nom::character::complete::char::<Span, nom::error::Error<Span>>('.'),
+                    |_| None,
+                ),
+                map(digit1::<Span, nom::error::Error<Span>>, |span| {
+                    Some(Element {
+                        kind: ElementKind::Number(span.chars().collect()),
+                        position: span.get_column() as i32,
+                    })
                 }),
-                map(is_not(".0123456789"), |span: Span| Element {
-                    kind: ElementKind::Symbol(span.chars().next().unwrap()),
-                    position: span.get_column() as i32,
+                map(is_not(".0123456789"), |span: Span| {
+                    Some(Element {
+                        kind: ElementKind::Symbol(span.chars().next().unwrap()),
+                        position: span.get_column() as i32,
+                    })
                 }),
             )),
         )
         .collect();
+
+        let parsed: Vec<Element> = parsed
+            .into_iter()
+            .flat_map(|p| if p.is_some() { p } else { None })
+            .collect();
 
         elements.push(parsed);
     }
